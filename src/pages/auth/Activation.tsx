@@ -6,8 +6,10 @@ import {
   Container,
   PinInput,
   Stack,
+  Group,
+  Anchor,
 } from "@mantine/core";
-import { IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import classes from "./ForgotPassword.module.css";
 import { usePost } from "@/services/api/useFecth";
 import { useEffect, useState } from "react";
@@ -21,6 +23,26 @@ export function Activation() {
   const email = location.state?.email ? location.state.email : null;
 
   const navigate = useNavigate();
+
+  const sendOTP = async (email: string) => {
+    try {
+      await usePost("/request-otp", { email });
+      return notifications.show({
+        title: "OTP sent",
+        message: "We have sent you an OTP to your email",
+        color: "blue",
+        icon: <IconCheck />,
+      });
+    } catch (error: any) {
+      console.log(error.response.data.message);
+      return notifications.show({
+        title: "OTP failed",
+        message: `${error.response.data.message}`,
+        color: "red",
+        icon: <IconX />,
+      });
+    }
+  };
 
   const handleSubmit = async (event: any) => {
     setLoading(true);
@@ -36,6 +58,12 @@ export function Activation() {
     try {
       const response: any = await usePost("/activation", { email, otp });
       if (response.status === 200) {
+        notifications.show({
+          title: "Account verified",
+          message: "Your account has been verified",
+          color: "green",
+          icon: <IconCheck />,
+        });
         return navigate("/");
       }
     } catch (error: any) {
@@ -76,6 +104,18 @@ export function Activation() {
               length={6}
               onChange={(value) => setOtp(value)}
             />
+            <Group justify="flex-end">
+              <Anchor
+                component="button"
+                type="button"
+                size="xs"
+                onClick={() => {
+                  sendOTP(email);
+                }}
+              >
+                Send OTP
+              </Anchor>
+            </Group>
             <Button type="submit" loading={isLoading}>
               Verify account
             </Button>

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL: string = "http://localhost:5000/api/v1/";
+const baseURL: string = "https://backend-auth-omega.vercel.app/";
 
 export const usePost = async (path: string, data: any) => {
   try {
